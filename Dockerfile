@@ -19,7 +19,7 @@ COPY ./app/package.json .
 COPY ./app/package-lock.json .
 RUN npm install
 
-# Copy app files
+# Copy app filesk
 COPY ./app .
 
 # Expose port

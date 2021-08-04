@@ -2,11 +2,11 @@ version: "3.8"
 
 services:
   my-docker-react-app:
-    container_name: "${PROJECT_NAME}_react"
+    container_name: "${PROJECT_NAME}react"
     networks:
       # Define the network on which traefik is going to operate.
       - web
-    image: app-dev
+    image: ${PROJECT_NAME}
     environment:
       REACT_APP_NAME: $REACT_APP_NAME
     build:
@@ -21,20 +21,139 @@ services:
       - "traefik.http.routers.${DOCKER_NAME}_app-http.entrypoints=web"
       # Define handler http host.
       # Define http middleware and redirection to https.
-      - "traefik.http.routers.${DOCKER_NAME}_app-http.rule=Host(`app.${DOCKER_BASE_URL}`)"
+      - "traefik.http.routers.${DOCKER_NAME}_app-http.rule=Host(`${DOCKER_BASE_URL}`)"
       - "traefik.http.routers.${DOCKER_NAME}_app-http.middlewares=${DOCKER_NAME}_app-https"
       - "traefik.http.middlewares.${DOCKER_NAME}_app-https.redirectscheme.scheme=https"
       # Enable handler entrypoint on https.
       - "traefik.http.routers.${DOCKER_NAME}_app.entrypoints=websecure"
       # Define handler host.
-      - "traefik.http.routers.${DOCKER_NAME}_app.rule=Host(`app.${DOCKER_BASE_URL}`)"
+      - "traefik.http.routers.${DOCKER_NAME}_app.rule=Host(`${DOCKER_BASE_URL}`)"
       # Instructs Traefik that the current router is dedicated to HTTPS requests only.
       - "traefik.http.routers.${DOCKER_NAME}_app.tls=true"
       # Set service port for loadbalancer
       # - "traefik.http.services.${PROJECT_NAME}_app.loadbalancer.server.port=8080"
       # Define on which network Traefik is operating.
       - "traefik.docker.network=web"
+  php:
+    build:
+      context: ./api-platform/api
+      target: api_platform_php
+    networks: 
+      - internal
+    depends_on:
+      - database
+    restart: unless-stopped
+    volumes:
+      - php_socket:/var/run/php
+    healthcheck:
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+
+  pwa:
+    build:
+      context: ./api-platform/pwa
+      target: api_platform_pwa_prod
+    networks: 
+      - web
+    environment:
+      API_PLATFORM_CLIENT_GENERATOR_ENTRYPOINT: http://caddy
+      NEXT_PUBLIC_ENTRYPOINT: http://caddy
+    labels:
+      # Enable handler entrypoint on http.
+      - "traefik.http.routers.${PWA_NAME}-http.entrypoints=web"
+      # Define handler http host.
+      # Define http middleware and redirection to https.
+      - "traefik.http.routers.${PWA_NAME}-http.rule=Host(`${PWA_BASE_URL}`)"
+      - "traefik.http.routers.${PWA_NAME}-http.middlewares=${PWA_NAME}-https"
+      - "traefik.http.middlewares.${PWA_NAME}-https.redirectscheme.scheme=https"
+      # Enable handler entrypoint on https.
+      - "traefik.http.routers.${PWA_NAME}.entrypoints=websecure"
+      # Define handler host.
+      - "traefik.http.routers.${PWA_NAME}.rule=Host(`${PWA_BASE_URL}`)"
+      # Instructs Traefik that the current router is dedicated to HTTPS requests only.
+      - "traefik.http.routers.${PWA_NAME}.tls=true"
+      # Set service port for loadbalancer
+      # - "traefik.http.services.${PROJECT_NAME}_app.loadbalancer.server.port=8080"
+      # Define on which network Traefik is operating.
+      - "traefik.docker.network=web"
+
+
+  caddy:
+    build:
+      context: api-platform/api
+      target: api_platform_caddy
+    networks: 
+      - internal
+      - web
+    depends_on:
+      - php
+      - pwa
+    environment:
+      PWA_UPSTREAM: pwa:3000
+      SERVER_NAME: ${SERVER_NAME:-localhost, caddy:80}
+      MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_PUBLISHER_JWT_KEY:-!ChangeMe!}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_SUBSCRIBER_JWT_KEY:-!ChangeMe!}
+    restart: unless-stopped
+    volumes:
+      - php_socket:/var/run/php
+      - caddy_data:/data
+      - caddy_config:/config
+    labels:
+      # Enable handler entrypoint on http.
+      - "traefik.http.routers.${CADDY_NAME}_app-http.entrypoints=web"
+      # Define handler http host.
+      # Define http middleware and redirection to https.
+      - "traefik.http.routers.${CADDY_NAME}_app-http.rule=Host(`${CADDY_BASE_URL}`)"
+      - "traefik.http.routers.${CADDY_NAME}_app-http.middlewares=${CADDY_NAME}_app-https"
+      - "traefik.http.middlewares.${CADDY_NAME}_app-https.redirectscheme.scheme=https"
+      # Enable handler entrypoint on https.
+      - "traefik.http.routers.${CADDY_NAME}_app.entrypoints=websecure"
+      # Define handler host.
+      - "traefik.http.routers.${CADDY_NAME}_app.rule=Host(`${CADDY_BASE_URL}`)"
+      # Instructs Traefik that the current router is dedicated to HTTPS requests only.
+      - "traefik.http.routers.${CADDY_NAME}_app.tls=true"
+      # Set service port for loadbalancer
+      # - "traefik.http.services.${PROJECT_NAME}_app.loadbalancer.server.port=8080"
+      # Define on which network Traefik is operating.
+      - "traefik.docker.network=web"
+    # ports:
+    #   # HTTP
+    #   - target: 80
+    #     published: 80
+    #     protocol: tcp
+    #   # HTTPS
+    #   - target: 443
+    #     published: 443
+    #     protocol: tcp
+    #   # HTTP/3
+    #   - target: 443
+    #     published: 443
+    #     protocol: udp
+
+  database:
+    image: postgres:13-alpine
+    networks: 
+      - internal
+    environment:
+      - POSTGRES_DB=api
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=api-platform
+    volumes:
+      - db_data:/var/lib/postgresql/data:rw
+      # you may use a bind-mounted host directory instead, so that it is harder to accidentally remove the volume and lose all your data!
+      # - ./api/docker/db/data:/var/lib/postgresql/data:rw
+
+volumes:
+  php_socket:
+  db_data:
+  caddy_data:
+  caddy_config:
+
 
 networks:
   web:
     external: true
+  internal: 
+    internal: true
