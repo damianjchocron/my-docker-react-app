@@ -15,7 +15,7 @@ services:
       context: .
       target: development
     volumes:
-      - ./app:/app
+      - ./app-react:/app-react
     labels:
       # Enable handler entrypoint on http.
       - "traefik.http.routers.${DOCKER_NAME}_app-http.entrypoints=web"
