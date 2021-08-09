@@ -34,11 +34,11 @@ const Tabla = ({ books }) => (
 Tabla.propTypes = {
     books: PropTypes.arrayOf(
         PropTypes.instanceOf(Book),
-        PropTypes.shape({
-            title: PropTypes.string,
-            author: PropTypes.string,
-            sales: PropTypes.number,
-            price: PropTypes.number
+        PropTypes.exact({
+            title: PropTypes.string.isRequired,
+            author: PropTypes.string.isRequired,
+            sales: PropTypes.number.isRequired,
+            price: PropTypes.number.isRequired
         })
     )
 }
