@@ -72,7 +72,10 @@ services:
     networks: 
       - web
       - internal
-    # command: ["php -S api.shop.docker.localdev:8001-t public"]
+    # command: ["ls"]
+    # command: ["php -S api.shop.docker.localdev:8001 -t public"]
+    # command: ["php -S 127.0.0.1:8000 -t public"]
+
 
   mariadb:
     image: 'bitnami/mariadb:10.3'
