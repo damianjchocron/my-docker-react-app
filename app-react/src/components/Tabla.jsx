@@ -12,6 +12,7 @@ const Tabla = ({ books }) => (
                     <th>Author</th>
                     <th>Sales</th>
                     <th>Price</th>
+                    <th>Email</th>
                 </tr>
             </thead>
             <tbody>
@@ -22,6 +23,7 @@ const Tabla = ({ books }) => (
                             <td>{book.author}</td>
                             <td>{book.sales}</td>
                             <td>{book.price}</td>
+                            <td>{book.email}</td>
                         </tr>
                     )
                 })
@@ -31,14 +33,30 @@ const Tabla = ({ books }) => (
     </div>
 )
 
+const isEmail = (propValue = 'books', key = 'email', componentName = 'Tabla', location = false, propFullName = false) => {
+
+    const prop = (location && propFullName) ? propFullName : key;
+
+    const regex = /^[-\w.%+]{1,64}@(?:[A-Z0-9-]{1,63}\.){1,125}[A-Z]{2,63}$/i;
+
+
+    if (!regex.test(propValue[key])) {
+        return new Error(`Invalid prop ${prop} passed to ${componentName}. Expected a valid email address.`);
+    }
+}
+
 Tabla.propTypes = {
+    // books: PropTypes.arrayOf(
+    //     PropTypes.instanceOf(Book)
+    // )
+
     books: PropTypes.arrayOf(
-        PropTypes.instanceOf(Book),
-        PropTypes.exact({
+        PropTypes.shape({
             title: PropTypes.string.isRequired,
             author: PropTypes.string.isRequired,
             sales: PropTypes.number.isRequired,
-            price: PropTypes.number.isRequired
+            price: PropTypes.number.isRequired,
+            email: isEmail
         })
     )
 }

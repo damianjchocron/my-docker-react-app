@@ -1,13 +1,13 @@
 import React from 'react'
 import Tabla from '../components/Tabla';
-import Books from '../components/Book'
+import { books } from '../data/books'
 
 function Ejercicio() {
 
 
   return (
     <div className="App">
-      <Tabla books={Books} h/>
+      <Tabla books={books} />
     </div>
   );
 }
