@@ -1,5 +1,5 @@
 import React from 'react'
-
+// import PropTypes from 'prop-types';
 
 class Book extends React.Component {
     constructor(title, author, sales, price, email) {
@@ -12,5 +12,12 @@ class Book extends React.Component {
         this.email = email;
     }
 }
+
+// Book.propTypes = {
+//     title: PropTypes.string.isRequired,
+//     author: PropTypes.string.isRequired,
+//     sales: PropTypes.number.isRequired,
+//     price: PropTypes.number.isRequired,
+// }
 
 export default Book;

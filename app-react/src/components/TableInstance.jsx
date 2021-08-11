@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 import React from 'react'
 import Book from './Book'
 
-const Tabla = ({ books }) => (
+const TableInstance = ({ books }) => (
     <div className="container">
-        <h1 className="card-title mx-4 mt-4">Table</h1>
+        <h1 className="card-title mx-4 mt-4">Table Instance</h1>
         <table className="table table-striped table-hover mx-auto w-75">
             <thead className="thead-dark">
                 <tr>
@@ -45,22 +45,24 @@ const isEmail = (propValue = 'books', key = 'email', componentName = 'Tabla', lo
     }
 }
 
-Tabla.propTypes = {
-    // books: PropTypes.arrayOf(
-    //     PropTypes.instanceOf(Book)
-    // )
-
+TableInstance.propTypes = {
     books: PropTypes.arrayOf(
+        //     PropTypes.instanceOf(Book)
+        // )
+
+        // books: PropTypes.arrayOf(
+        // PropTypes.oneOfType([
         PropTypes.shape({
             title: PropTypes.string.isRequired,
             author: PropTypes.string.isRequired,
             sales: PropTypes.number.isRequired,
             price: PropTypes.number.isRequired,
             email: isEmail
-        })
+        }),
+        // PropTypes.instanceOf(Book)
+        // ]
+        // )
     )
 }
 
-
-
-export default Tabla;
+export default TableInstance;
