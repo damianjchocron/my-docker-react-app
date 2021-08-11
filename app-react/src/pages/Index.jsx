@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import Card from '../components/Card';
+import { Card } from '../components/Card';
 import { URL_API_BASE } from '../CONST';
 
-export default function Index() {
+export const Index = () => {
     const [products, setProducts] = useState([]);
 
     useEffect(() => {
@@ -18,4 +18,3 @@ export default function Index() {
         </div>
     )
 }
-

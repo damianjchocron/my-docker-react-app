@@ -1,9 +1,9 @@
 import React from 'react'
 
-export default function Error() {
-    return (
-        <div>
-            Esa página no existe.
-        </div>
-    )
-}
+export const Error = () =>
+(
+    <div>
+        Esa página no existe.
+    </div>
+)
+

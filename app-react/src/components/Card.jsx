@@ -2,7 +2,7 @@ import React from 'react'
 import { URL_APP_BASE, URL_API_BASE } from '../CONST'
 
 
-export default function Card({ products, setProducts }) {
+export const Card = ({ products, setProducts }) => {
 
   const deleted = (theProduct) => {
 
